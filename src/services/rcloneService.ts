@@ -1,20 +1,16 @@
 import axios, { AxiosError } from 'axios';
 
-interface FsInfo {
-  [key: string]: any; // Define a more specific type if you know the structure of fsInfo
-}
-
-interface RcloneResponse {
-  fsInfo: FsInfo;
+interface RcloneListRemotesResponse {
+  remotes: string[];
 }
 
 export async function getStorages(): Promise<string[]> {
-  const rcloneApiUrl = 'http://localhost:5572/operations/fsinfo';
+  const rcloneApiUrl = 'http://localhost:5572/config/listremotes'; // Changed API endpoint
   const username = 'user';
   const password = 'pass';
 
   try {
-    const response = await axios.post<RcloneResponse>(
+    const response = await axios.post<RcloneListRemotesResponse>( // Changed response type
       rcloneApiUrl,
       {},
       {
@@ -24,8 +20,8 @@ export async function getStorages(): Promise<string[]> {
       }
     );
 
-    if (response.data && response.data.fsInfo) {
-      return Object.keys(response.data.fsInfo);
+    if (response.data && Array.isArray(response.data.remotes)) {
+      return response.data.remotes; // Return the remotes array
     } else {
       console.error('Error: Invalid response format from Rclone API');
       return [];
